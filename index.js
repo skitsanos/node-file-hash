@@ -9,13 +9,20 @@ const fs = require('fs');
 
 const fileHash = (filePath, algorithm = 'md5') => new Promise(resolve =>
 {
+    const hrstart = process.hrtime();
+
     const hash = crypto.createHash(algorithm);
-    fs.createReadStream(filePath).on('data', data => hash.update(data)).on('end', () => resolve(hash.digest('hex')));
+    fs.createReadStream(filePath).on('data', data => hash.update(data))
+      .on('end', () => resolve({
+          hash: hash.digest('hex'),
+          execTime: process.hrtime(hrstart)[1] / 1000000
+      }));
 });
 
+//Calclulate hash for a file
 
 (async () =>
 {
-    const hash = await fileHash('package.json');
+    const hash = await fileHash('wildfly-22.0.0.Final.zip');
     console.log(hash);
 })();
